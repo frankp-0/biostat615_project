@@ -1,5 +1,5 @@
 run_vc_optimizer <- function(x, sUt, Ce, ind){
-    b <- t(sUt) %*% x[, ..ind]
+    b <- t(sUt) %*% unlist(x[, ..ind])
     ind1 <- ind + 1
     se <- x[, ..ind1]
     K = t(sUt) %*% diag(se) %*% Ce %*% diag(se) %*% sUt
@@ -8,10 +8,10 @@ run_vc_optimizer <- function(x, sUt, Ce, ind){
 
 sqrt_ginv <- function(X, tol = sqrt(2.22044604925e-16)){
     Xsvd <- svd(X);
-    u <- Xsvd$u; s <- Xsvd$d; vh <- Xsvd$v
+    u <- Xsvd$u; s <- Xsvd$d; vh <- t(Xsvd$v)
     pos <- s > max(tol * s[1], 0)
     if (all(pos)){
-        res <- t(vh) %*% sqrt(diag(1 / s)) %*% t(u)
+        res <- t(vh) %*% diag(1 / s)**0.5 %*% t(u)
     } else if (all(!pos)){
         res <- matrix(0, nrow = nrow(X), ncol = ncol(X))
     } else {
@@ -20,20 +20,17 @@ sqrt_ginv <- function(X, tol = sqrt(2.22044604925e-16)){
     return(res)
 }
 
-vcm_optimization <- function(){
-    }
-
 LL_fun <- function(x, n, sq, w){
     return(-0.5 * (n * log(2 * pi) + sum(log(w + x)) + sum(sq / (w +  x))))
 }
 
 LLp_fun <- function(x, sq, w){
     return(-0.5 * (sum(1 / (w + x)) - sum(sq / (w + x)^2)))    
-    }
+}
 
 LLdp_fun <- function(x, sq, w){
     return(-0.5*(-sum(1/(w+x)**2)+2*sum(sq/(w+x)**3)))    
-    }
+}
 
 NR_root <- function(f, df, x, sq, w, i = 0, iter_max = 10000, tol = sqrt(2.22044604925e-16)){
     while(abs(f(x, sq, w)) > tol){
@@ -46,7 +43,7 @@ NR_root <- function(f, df, x, sq, w, i = 0, iter_max = 10000, tol = sqrt(2.22044
 
 vcm_optimization <- function(b, K, tol = sqrt(2.22044604925e-16)){
     n = length(b)
-    eigk <- eigen(K)
+    eigk <- eigen(K, symmetric = T)
     l <- eigk$values[n:1]; cv <- -eigk$vectors[,n:1]
     p = l > tol 
     if(all(p)){
@@ -58,7 +55,7 @@ vcm_optimization <- function(b, K, tol = sqrt(2.22044604925e-16)){
         sq = cr**2;
         w = l[p]
     }
-    t <- 10**((-36:23)/4)
+    it <- 10**((-36:23)/4)
     init <- it[which.max(sapply(it, function(i) LL_fun(i, n, sq, w)))]
     tausq <- NR_root(LLp_fun, LLdp_fun, init, sq, w)
     if (tausq <0){tausq = 0}
@@ -67,5 +64,4 @@ vcm_optimization <- function(b, K, tol = sqrt(2.22044604925e-16)){
     if(alt_ll < null_ll){tausq = 0; alt_ll = null_ll}
     pleio_stat <- -2 * (null_ll - alt_ll)
     return(list(tausq = tausq, pleio_stat = pleio_stat))
-    }
-l    
+}
