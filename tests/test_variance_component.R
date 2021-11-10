@@ -5,9 +5,9 @@ source("../code/variance_component.R")
                                         # Test 1
 test_that("Test 1", {
     df <- fread("vc_1.txt")
-    n <- nrow(Sg)
-    ind <- seq(1, 2 * n, 2)
     Sg <- as.matrix(fread("../data/sg.txt.gz"))
+    n <- nrow(Sg)
+    ind <- seq(1, 2 * n, 2)    
     Ce <- as.matrix(fread("../data/re.txt.gz"))
     sqrt_Sg_ginv <- sqrt_ginv(Sg)
     res <- run_vc_optimizer(df, sqrt_Sg_ginv, Ce, ind)
