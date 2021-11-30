@@ -40,7 +40,7 @@ importance_sampling <- function(N, gwas_N, U, Ce, tol = 1e-17){
     Palpha <- rowSums(t(do.call("rbind", d_P)) * alpha)
     pvalues <- sapply(thres_vec, function(thres) thres_estimate_pvalue(thres, Sdelpy, Palpha, alpha, d_Q, d_P, nPj, N))
     pvalue_df <- data.frame(thres = thres_vec, p = pvalues)
-    pvalue_df <- pvalue_df[order(pvalue_df$p),]
+    pvalue_df <- pvalue_df[order(pvalue_df$p, decreasing = T),]
     return(pvalue_df)
 }
 
