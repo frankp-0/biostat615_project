@@ -1,8 +1,8 @@
-#N <- 1000
-#gwas_N <- read.csv("~/pleio/N_gwas.csv")[,-1]
-#U <- as.matrix(read.csv("~/pleio/Sg.csv")[,-1])
-#Ce <- as.matrix(read.csv("~/pleio/Ce.csv")[-1])
-importance_sampling <- function(N, gwas_N, U, Ce, tol = 1e-17){
+N <- 100
+gwas_N <- read.csv("~/pleio/N_gwas.csv")[,-1]
+U <- as.matrix(read.csv("~/pleio/Sg.csv")[,-1])
+Ce <- as.matrix(read.csv("~/pleio/Ce.csv")[-1])
+importance_sampling <- function(N, gwas_N, U, Ce, tol = 2.22044604925e-16**0.5, out){
     se <- 1/sqrt(gwas_N)
     nstudy <- n <- length(se)
     D <- diag(se) %*% Ce %*% diag(se)
@@ -41,7 +41,7 @@ importance_sampling <- function(N, gwas_N, U, Ce, tol = 1e-17){
     pvalues <- sapply(thres_vec, function(thres) thres_estimate_pvalue(thres, Sdelpy, Palpha, alpha, d_Q, d_P, nPj, N))
     pvalue_df <- data.frame(thres = thres_vec, p = pvalues)
     pvalue_df <- pvalue_df[order(pvalue_df$p, decreasing = T),]
-    return(pvalue_df)
+    write.csv(pvalue_df, file = out)
 }
 
 thres_estimate_pvalue <- function(thres, Sdelpy, Palpha, alpha, d_Q, d_P, nPj, N){
